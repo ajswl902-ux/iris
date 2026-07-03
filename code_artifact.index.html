@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>붓꽃 품종 예측 대시보드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #f0fdf4; }
+        .iris-card { background: white; border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-green-800">🌸 붓꽃 품종 예측 AI 대시보드</h1>
+            <p class="text-green-600">슬라이더를 조정하여 붓꽃의 품종을 실시간으로 예측합니다.</p>
+        </header>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- 입력 폼 -->
+            <div class="iris-card p-6">
+                <h2 class="text-xl font-semibold mb-4 text-gray-700">꽃 정보 입력 (cm)</h2>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">꽃받침 길이: <span id="sl-val">5.8</span></label>
+                        <input type="range" id="sl" min="4" max="8" step="0.1" value="5.8" class="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer" oninput="updatePredict()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">꽃받침 너비: <span id="sw-val">3.0</span></label>
+                        <input type="range" id="sw" min="2" max="5" step="0.1" value="3.0" class="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer" oninput="updatePredict()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">꽃잎 길이: <span id="pl-val">4.0</span></label>
+                        <input type="range" id="pl" min="1" max="7" step="0.1" value="4.0" class="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer" oninput="updatePredict()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">꽃잎 너비: <span id="pw-val">1.2</span></label>
+                        <input type="range" id="pw" min="0.1" max="3" step="0.1" value="1.2" class="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer" oninput="updatePredict()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 결과 표시 -->
+            <div class="iris-card p-6 flex flex-col items-center justify-center">
+                <div class="text-center w-full">
+                    <p class="text-sm text-gray-500 uppercase tracking-widest font-bold">예측된 품종</p>
+                    <div id="predictionName" class="text-4xl font-black text-green-600 my-4 h-16 flex items-center justify-center">Versicolor</div>
+                    <div class="h-64 w-64 mx-auto">
+                        <canvas id="probChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('probChart').getContext('2d');
+        let chart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Setosa', 'Versicolor', 'Virginica'],
+                datasets: [{ data: [0, 100, 0], backgroundColor: ['#4ade80', '#fbbf24', '#f87171'] }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+
+        function updatePredict() {
+            const sl = parseFloat(document.getElementById('sl').value);
+            const sw = parseFloat(document.getElementById('sw').value);
+            const pl = parseFloat(document.getElementById('pl').value);
+            const pw = parseFloat(document.getElementById('pw').value);
+
+            document.getElementById('sl-val').innerText = sl;
+            document.getElementById('sw-val').innerText = sw;
+            document.getElementById('pl-val').innerText = pl;
+            document.getElementById('pw-val').innerText = pw;
+
+            // 결정 트리 기반 로직 시뮬레이션
+            let probs = [0, 0, 0];
+            if (pl < 2.5) {
+                probs = [100, 0, 0];
+                document.getElementById('predictionName').innerText = "Setosa";
+            } else if (pw < 1.7) {
+                probs = [0, 95, 5];
+                document.getElementById('predictionName').innerText = "Versicolor";
+            } else {
+                probs = [0, 10, 90];
+                document.getElementById('predictionName').innerText = "Virginica";
+            }
+
+            chart.data.datasets[0].data = probs;
+            chart.update();
+        }
+    </script>
+</body>
+</html>
